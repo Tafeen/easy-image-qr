@@ -15,9 +15,7 @@ def remove_transparency(image, bg_colour=(255, 255, 255)):
     return image
 
 
-def create_qr_illustration(product, font_file="assets/Fonts/Mukta/Mukta-medium.ttf"):
-    width = 1500
-    height = 500
+def create_qr_illustration(product, width, height, font_file):
     qr_image = Image.new(mode="RGB", size=(width, height), color=(255, 255, 255))
     illustration = ImageDraw.Draw(qr_image)
 
@@ -54,28 +52,35 @@ def create_qr_illustration(product, font_file="assets/Fonts/Mukta/Mukta-medium.t
     return qr_image
 
 
-def create_qr_illustrations_list_pdf(products):
+def create_qr_illustrations_list_pdf(
+    products,
+    width=1800,
+    height=500,
+    images_per_page=7,
+    font_file="assets/Fonts/Mukta/Mukta-medium.ttf",
+):
 
     pages = []
     images_index = 0
-    images_per_page = 7
+
     page = Image.new(mode="RGB", size=(2480, 3508), color=(255, 255, 255))
     for idx, product in enumerate(products):
-        image = create_qr_illustration(product)
+        image = create_qr_illustration(
+            product, width=width, height=height, font_file=font_file
+        )
         page.paste(image, (0, image.height * images_index))
         images_index += 1
 
-        if (
-            images_index == images_per_page
-            and len(products) - idx - 1 < images_per_page
-        ):
+        # Last page
+        if len(products) == idx + 1 and len(products) - idx + 1 < images_per_page:
             pages.append(page)
-            # Create new page
-            page = Image.new(mode="RGB", size=(2480, 3508), color=(255, 255, 255))
-            images_index = 0
+
         else:
-            if len(products) - idx - 1 == 0:
+            # Next page
+            if images_index == images_per_page:
                 pages.append(page)
+                images_index = 0
+                page = Image.new(mode="RGB", size=(2480, 3508), color=(255, 255, 255))
 
     pages_to_append = list(pages)
     pages_to_append.pop(0)
@@ -84,7 +89,20 @@ def create_qr_illustrations_list_pdf(products):
 
 create_qr_illustrations_list_pdf(
     products=[
-        {"text": "1", "qr": "Link to product", "logo": "assets/Icons/leaf.png"},
-        {"text": "2", "qr": "Link to product2", "logo": "assets/Icons/leaf.png"},
+        {
+            "text": "Product 1",
+            "qr": "QR data for product 1",
+            "logo": "assets/Icons/leaf.png",
+        },
+        {
+            "text": "Product 2",
+            "qr": "QR data for product 2",
+            "logo": "assets/Icons/leaf.png",
+        },
+        {
+            "text": "Product 3",
+            "qr": "QR data for product 2",
+            "logo": "assets/Icons/leaf.png",
+        }
     ]
 )
